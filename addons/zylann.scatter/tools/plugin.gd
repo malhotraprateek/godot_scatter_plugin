@@ -125,6 +125,24 @@ func forward_spatial_gui_input(p_camera, p_event):
 	_editor_camera = p_camera
 	return captured_event
 
+func place_instances(pos: Vector3):
+	for i in range(_node.instance_density):
+		var instance = _pattern.instance()
+		
+		var random_radius = sqrt(rand_range(0, _node.instance_radius));
+		var random_theta = rand_range(0, 2 * PI);
+		
+		var random_dist_position_offset = Vector3(
+			random_radius * cos(random_theta),
+			0,
+			random_radius * sin(random_theta));
+			
+		instance.translation = pos + random_dist_position_offset;
+
+		instance.rotate_y(rand_range(-PI, PI))
+		_node.add_child(instance)
+		instance.owner = get_editor_interface().get_edited_scene_root()
+		_placed_instances.append(instance)
 
 func _physics_process(delta):
 	if _editor_camera == null:
@@ -164,19 +182,13 @@ func _physics_process(delta):
 					
 					# Not accurate, you might still paint stuff too close to others,
 					# but should be good enough and cheap
-					var too_close = false
+					var too_close = false					
 					if len(_placed_instances) != 0:
 						var last_placed_transform = _placed_instances[-1].global_transform
-						if last_placed_transform.origin.distance_to(pos) < _pattern_margin:
+						if last_placed_transform.origin.distance_to(pos) < _node.instance_radius:
 							too_close = true
-					
 					if not too_close:
-						var instance = _pattern.instance()
-						instance.translation = pos
-						instance.rotate_y(rand_range(-PI, PI))
-						_node.add_child(instance)
-						instance.owner = get_editor_interface().get_edited_scene_root()
-						_placed_instances.append(instance)
+						place_instances(pos);
 	
 		elif action == ACTION_ERASE:
 			var time_before = OS.get_ticks_usec()

@@ -4,6 +4,8 @@ extends Spatial
 
 export(Array, PackedScene) var _scenes = []
 
+export(float) var instance_radius: float = 1.0;
+export(int) var instance_density: int = 5;
 
 func _ready():
 	_remove_dangling_patterns()
